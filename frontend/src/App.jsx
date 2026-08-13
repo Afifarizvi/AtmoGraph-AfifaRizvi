@@ -1,4 +1,5 @@
 import './App.css'
+import GraphView from './GraphView'
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
 
       <main className="dashboard">
         <div className="graph-container">
-          <p className="placeholder-text">Graph visualization coming soon...</p>
+          <GraphView />
         </div>
       </main>
     </div>
