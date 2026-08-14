@@ -37,6 +37,29 @@ AtmoGraph-AfifaRizvi/
 | Week 3 | GNN training for delay prediction | Predictive overlay (at-risk nodes) |
 | Week 4 | Real-time WebSocket/FastAPI integration | Timeline sliders, polish |
 
+## Progress Log
+
+### ✅ Week 1 — Complete (Days 1–6)
+
+**Backend:**
+- Neo4j AuraDB Free instance set up and connected via Python driver
+- Reusable `Neo4jClient` class built with query helpers (node counts, relationship counts, ripple path traversal)
+- Mock global supply chain graph seeded: **32 nodes** (10 Suppliers, 8 Manufacturers, 8 Ports, 6 Retailers) and **32 relationships** (SUPPLIES, SHIPS_VIA, ROUTES_TO, DELIVERS_TO) across Electronics, Automotive, and Pharmaceuticals industries
+- Verified multi-hop ripple path querying (e.g. Supplier → Manufacturer → Port → Port → Retailer)
+
+**Frontend:**
+- React app scaffolded with Vite
+- Dark-themed dashboard layout with header and graph container
+- Static supply chain network visualized using React Flow, with labeled nodes and relationship edges, zoom/pan controls, and minimap
+
+**Milestones achieved:** Graph Logic (NLP-ready data ingestion into Neo4j) and Visualization Validation (frontend renders interconnected graph data) — both Mid-Project Review requirements met ahead of schedule.
+
+### 🔜 Week 2 — In Progress
+
+- NLP ingestion engine (spaCy/HuggingFace) for entity extraction from news text
+- Node risk-state updates in Neo4j based on detected disruptions
+- Interactive graph UI: node-click details, zoom/pan refinement
+
 ## Author
 Afifa Rizvi — MSc IT, Mohanlal Sukhadia University
 Internship Project @ Infotact Solutions
