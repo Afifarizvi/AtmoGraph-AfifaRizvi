@@ -2,15 +2,16 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
-# Keywords that indicate a supply chain disruption
 DISRUPTION_KEYWORDS = [
     "strike", "shutdown", "delay", "disrupt", "closure", "halt",
     "shortage", "blockade", "flood", "earthquake", "fire", "protest"
 ]
 
+NEGATION_WORDS = ["no", "not", "without", "never", "none"]
+
 
 def extract_entities(text):
-    """Extract structured entities from a news/disruption text."""
+    """Extract structured entities from a news/disruption text, with basic negation handling."""
     doc = nlp(text)
 
     locations = []
@@ -22,14 +23,23 @@ def extract_entities(text):
         elif ent.label_ == "ORG":
             organizations.append(ent.text)
 
-    # Simple keyword-based disruption detection
     text_lower = text.lower()
-    detected_keywords = [kw for kw in DISRUPTION_KEYWORDS if kw in text_lower]
+    words = text_lower.split()
+
+    detected_keywords = []
+    for kw in DISRUPTION_KEYWORDS:
+        for i, word in enumerate(words):
+            if kw in word:
+                # Check a small window before the keyword for negation words
+                window = words[max(0, i - 3):i]
+                if not any(neg in window for neg in NEGATION_WORDS):
+                    detected_keywords.append(kw)
+                break
 
     return {
         "locations": list(set(locations)),
         "organizations": list(set(organizations)),
-        "disruption_keywords": detected_keywords,
+        "disruption_keywords": list(set(detected_keywords)),
         "has_disruption": len(detected_keywords) > 0,
     }
 
@@ -39,12 +49,6 @@ if __name__ == "__main__":
         """A sudden port strike has broken out in Rotterdam, Netherlands,
         disrupting operations. Stuttgart Auto Factory in Germany is expected
         to face significant delays.""",
-
-        """Shenzhen Electronics Factory announced a temporary shutdown due to
-        a fire at its main production facility in China.""",
-
-        """Congo Cobalt Mines reported a shortage of skilled labor, causing
-        delays in raw material shipments to Shenzhen Electronics Factory.""",
 
         """Taiwan Semiconductor Co continues normal operations with no
         reported disruptions this quarter.""",
