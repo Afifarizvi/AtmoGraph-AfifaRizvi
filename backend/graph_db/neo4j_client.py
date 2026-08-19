@@ -53,6 +53,20 @@ class Neo4jClient:
         """
         return self.run_query(query, {"node_name": node_name})
 
+    def update_node_risk(self, node_name, risk_level):
+        """Update the risk_level property of a node identified by its name."""
+        query = """
+        MATCH (n {name: $node_name})
+        SET n.risk_level = $risk_level
+        RETURN n.name AS name, n.risk_level AS risk_level, labels(n)[0] AS type
+        """
+        return self.run_query(query, {"node_name": node_name, "risk_level": risk_level})
+
+    def get_node_risk(self, node_name):
+        """Fetch the current risk_level of a node."""
+        query = "MATCH (n {name: $node_name}) RETURN n.risk_level AS risk_level"
+        result = self.run_query(query, {"node_name": node_name})
+        return result[0]["risk_level"] if result else None
 
 if __name__ == "__main__":
     client = Neo4jClient()
