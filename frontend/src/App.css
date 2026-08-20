@@ -40,3 +40,61 @@
   color: #888;
   font-size: 1.1rem;
 }
+
+.details-panel {
+  width: 280px;
+  height: 100%;
+  background-color: white;
+  border-left: 1px solid #ddd;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.details-panel h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.detail-label {
+  color: #888;
+  font-weight: 500;
+}
+
+.risk-badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.risk-low {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.risk-high {
+  background-color: #f8d7da;
+  color: #721c24;
+}
