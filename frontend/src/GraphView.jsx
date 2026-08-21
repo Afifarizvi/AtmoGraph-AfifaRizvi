@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -9,8 +9,27 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { initialNodes, initialEdges } from './data/mockGraphData';
 
+const riskStyles = {
+  low: { background: '#d4edda', border: '2px solid #28a745' },
+  medium: { background: '#fff3cd', border: '2px solid #ffc107' },
+  high: { background: '#f8d7da', border: '2px solid #dc3545' },
+};
+
+function applyRiskStyling(nodes) {
+  return nodes.map((node) => ({
+    ...node,
+    style: {
+      ...riskStyles[node.data.risk_level],
+      borderRadius: 6,
+      padding: 4,
+      fontWeight: node.data.risk_level === 'high' ? 600 : 400,
+    },
+  }));
+}
+
 function GraphView() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const styledInitialNodes = useMemo(() => applyRiskStyling(initialNodes), []);
+  const [nodes, , onNodesChange] = useNodesState(styledInitialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(null);
 
@@ -33,8 +52,21 @@ function GraphView() {
         >
           <Background />
           <Controls />
-          <MiniMap />
+          <MiniMap
+            nodeColor={(node) => {
+              const level = node.data?.risk_level;
+              if (level === 'high') return '#dc3545';
+              if (level === 'medium') return '#ffc107';
+              return '#28a745';
+            }}
+          />
         </ReactFlow>
+      </div>
+
+      <div className="legend">
+        <div className="legend-item"><span className="legend-dot low"></span> Low Risk</div>
+        <div className="legend-item"><span className="legend-dot medium"></span> Medium Risk</div>
+        <div className="legend-item"><span className="legend-dot high"></span> High Risk</div>
       </div>
 
       {selectedNode && (

@@ -98,3 +98,33 @@
   background-color: #f8d7da;
   color: #721c24;
 }
+
+.legend {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  z-index: 10;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.low { background-color: #28a745; }
+.legend-dot.medium { background-color: #ffc107; }
+.legend-dot.high { background-color: #dc3545; }

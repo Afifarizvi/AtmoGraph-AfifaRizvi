@@ -9,7 +9,7 @@ export const initialNodes = [
   { id: 'mfg-2', data: { label: 'Stuttgart Auto Factory', type: 'Manufacturer', country: 'Germany', industry: 'Automotive', risk_level: 'high' }, position: { x: 250, y: 300 } },
 
   // Ports
-  { id: 'port-1', data: { label: 'Port of Shanghai', type: 'Port', country: 'China', industry: '-', risk_level: 'low' }, position: { x: 500, y: 50 } },
+  { id: 'port-1', data: { label: 'Port of Shanghai', type: 'Port', country: 'China', industry: '-', risk_level: 'medium' }, position: { x: 500, y: 50 } },
   { id: 'port-2', data: { label: 'Port of Rotterdam', type: 'Port', country: 'Netherlands', industry: '-', risk_level: 'high' }, position: { x: 500, y: 300 } },
   { id: 'port-3', data: { label: 'Port of Los Angeles', type: 'Port', country: 'USA', industry: '-', risk_level: 'low' }, position: { x: 750, y: 50 } },
   { id: 'port-4', data: { label: 'Port of Baltimore', type: 'Port', country: 'USA', industry: '-', risk_level: 'low' }, position: { x: 750, y: 300 } },
