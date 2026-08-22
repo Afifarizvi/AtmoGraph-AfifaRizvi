@@ -54,11 +54,25 @@ AtmoGraph-AfifaRizvi/
 
 **Milestones achieved:** Graph Logic (NLP-ready data ingestion into Neo4j) and Visualization Validation (frontend renders interconnected graph data) — both Mid-Project Review requirements met ahead of schedule.
 
-### 🔜 Week 2 — In Progress
+### ✅ Week 2 — Complete (Days 1–6)
 
-- NLP ingestion engine (spaCy/HuggingFace) for entity extraction from news text
-- Node risk-state updates in Neo4j based on detected disruptions
-- Interactive graph UI: node-click details, zoom/pan refinement
+**Backend (NLP Pipeline):**
+- NLP environment set up with spaCy (`en_core_web_sm`) for Named Entity Recognition
+- Structured entity extraction built: identifies locations (GPE), organizations (ORG), and disruption-related keywords (strike, shutdown, delay, shortage, etc.) from raw news text
+- Negation handling added to avoid false positives (e.g. "no reported disruptions" correctly ignored)
+- Entity-to-graph matching implemented: extracted organizations matched against Neo4j node names using exact + substring fallback matching (covers cases where NER misses smaller/lesser-known entities)
+- End-to-end disruption pipeline built: **news text → entity extraction → Neo4j node matching → automatic risk_level update**, verified working (e.g. "Stuttgart Auto Factory" risk updated from `low` to `high` based on live text input)
+
+**Frontend:**
+- Node-click interactivity added to the React Flow graph — clicking a node opens a details panel showing type, country, industry, and risk level
+- Risk-based node coloring implemented (green = low, yellow = medium, red = high) with a visual legend, so at-risk entities are identifiable at a glance without clicking
+
+**Milestones achieved:** Full backend-to-frontend risk pipeline is functional — a disruption mentioned in text can be traced through NLP extraction, matched to the correct graph node, and reflected visually on the dashboard as a color change.
+
+### 🔜 Week 3 — In Progress
+
+- Graph Neural Network (PyTorch Geometric) to predict downstream delays based on upstream disruption features
+- Predictive overlay refinement on the frontend based on ML predictions
 
 ## Author
 Afifa Rizvi — MSc IT, Mohanlal Sukhadia University
