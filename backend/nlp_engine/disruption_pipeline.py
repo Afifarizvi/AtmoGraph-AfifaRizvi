@@ -35,19 +35,28 @@ def process_disruption_text(text, client, risk_level="high"):
 if __name__ == "__main__":
     client = Neo4jClient()
 
-    news_text = """
-    A sudden port strike has broken out in Rotterdam, Netherlands, disrupting
-    operations at one of Europe's busiest shipping hubs. Stuttgart Auto Factory
-    in Germany, which relies on the port for exports, is expected to face
-    significant delays.
-    """
+    news_articles = [
+        """A sudden port strike has broken out in Rotterdam, Netherlands, disrupting
+        operations at one of Europe's busiest shipping hubs. Stuttgart Auto Factory
+        in Germany, which relies on the port for exports, is expected to face
+        significant delays.""",
 
-    print("=== Processing disruption news ===")
-    output = process_disruption_text(news_text, client)
+        """Shenzhen Electronics Factory announced a temporary shutdown due to
+        a fire at its main production facility in China.""",
 
-    print("\n=== Verifying updated risk levels ===")
-    for node in output["updated_nodes"]:
-        print(f"{node['name']} ({node['type']}) -> risk_level: {node['risk_level']}")
+        """Congo Cobalt Mines reported a shortage of skilled labor, causing
+        delays in raw material shipments.""",
+
+        """Port of Shanghai is experiencing significant congestion and delays
+        following a recent earthquake near the coastal region.""",
+
+        """Toyota City Plant in Japan halted operations temporarily following
+        a workers protest over new labor policies.""",
+    ]
+
+    for text in news_articles:
+        print(f"\n--- Processing article ---")
+        process_disruption_text(text, client)
 
     client.close()
     

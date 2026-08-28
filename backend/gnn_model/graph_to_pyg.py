@@ -43,8 +43,7 @@ def one_hot(value, categories):
 def build_node_features(node):
     type_vec = one_hot(node["type"], NODE_TYPES)
     industry_vec = one_hot(node["industry"], INDUSTRIES)
-    risk_val = [RISK_LEVELS.get(node["risk_level"], 0.0)]
-    return type_vec + industry_vec + risk_val
+    return type_vec + industry_vec 
 
 
 def build_pyg_graph():
@@ -55,14 +54,15 @@ def build_pyg_graph():
 
     client.close()
 
-    # Map node name -> index
     name_to_idx = {node["name"]: i for i, node in enumerate(nodes)}
 
-    # Build feature matrix
     features = [build_node_features(node) for node in nodes]
     x = torch.tensor(features, dtype=torch.float)
 
-    # Build edge_index
+    # Target labels: risk_level as a numeric value (this is what the model learns to predict)
+    targets = [RISK_LEVELS.get(node["risk_level"], 0.0) for node in nodes]
+    y = torch.tensor(targets, dtype=torch.float)
+
     edge_list = []
     for edge in edges:
         src_idx = name_to_idx.get(edge["source"])
@@ -72,7 +72,7 @@ def build_pyg_graph():
 
     edge_index = torch.tensor(edge_list, dtype=torch.long).t().contiguous()
 
-    data = Data(x=x, edge_index=edge_index)
+    data = Data(x=x, edge_index=edge_index, y=y)
 
     return data, nodes, name_to_idx
 
