@@ -79,6 +79,11 @@ def train():
             name = idx_to_name[i]
             print(f"{name:35s} | actual: {data.y[i].item():.2f} | predicted: {final_predictions[i].item():.4f}")
 
+    # Save trained model weights
+    model_path = os.path.join(os.path.dirname(__file__), "risk_gnn_weights.pt")
+    torch.save(model.state_dict(), model_path)
+    print(f"\n✅ Model saved to {model_path}")
+    
     return model, data, nodes, name_to_idx
 
 

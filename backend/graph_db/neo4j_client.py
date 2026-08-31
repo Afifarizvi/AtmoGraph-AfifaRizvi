@@ -62,6 +62,15 @@ class Neo4jClient:
         """
         return self.run_query(query, {"node_name": node_name, "risk_level": risk_level})
 
+    def update_predicted_risk(self, node_name, predicted_score):
+        """Store the GNN's predicted risk score on a node, separate from the manually-set risk_level."""
+        query = """
+        MATCH (n {name: $node_name})
+        SET n.predicted_risk_score = $predicted_score
+        RETURN n.name AS name, n.predicted_risk_score AS predicted_risk_score
+        """
+        return self.run_query(query, {"node_name": node_name, "predicted_score": predicted_score})
+    
     def get_node_risk(self, node_name):
         """Fetch the current risk_level of a node."""
         query = "MATCH (n {name: $node_name}) RETURN n.risk_level AS risk_level"
