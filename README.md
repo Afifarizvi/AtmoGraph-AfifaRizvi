@@ -69,10 +69,23 @@ AtmoGraph-AfifaRizvi/
 
 **Milestones achieved:** Full backend-to-frontend risk pipeline is functional — a disruption mentioned in text can be traced through NLP extraction, matched to the correct graph node, and reflected visually on the dashboard as a color change.
 
-### 🔜 Week 3 — In Progress
+### ✅ Week 3 — Complete (Days 1–6)
 
-- Graph Neural Network (PyTorch Geometric) to predict downstream delays based on upstream disruption features
-- Predictive overlay refinement on the frontend based on ML predictions
+**Backend (GNN Engineering):**
+- PyTorch + PyTorch Geometric environment set up, verified working with Apple Silicon (MPS) acceleration
+- Neo4j graph converted into PyTorch Geometric `Data` format: node features (one-hot encoded type + industry) and edge index built directly from live graph data
+- `RiskGNN` model architecture designed — a 2-layer Graph Convolutional Network (GCN) that outputs a continuous risk score (0–1) per node based on its own features and its neighbors' features
+- Training pipeline built with train/test node splitting (balanced across high/low risk) to properly evaluate generalization instead of memorization
+- Identified and fixed a data leakage issue (risk_level was initially included as both an input feature and the prediction target) and a class imbalance issue (too few high-risk examples), both resolved by separating features from labels and expanding disruption examples via the Week 2 NLP pipeline
+- **Validated generalization:** on held-out test nodes never used in loss calculation, the model correctly predicted "Toyota City Plant" as high-risk (0.46) purely from graph structure and node features
+- Trained model weights saved (`risk_gnn_weights.pt`) and a full inference pipeline built that loads the model, runs predictions across the whole graph, and writes them back to Neo4j as a `predicted_risk_score` property on every node
+
+**Milestone achieved:** End-to-end ripple-effect prediction pipeline — a disruption anywhere in the graph can now influence GNN-predicted risk scores for connected/similar nodes, not just the directly affected one.
+
+### 🔜 Week 4 — In Progress
+
+- Real-time integration: connect the ML pipeline to a WebSocket/FastAPI stream for live ripple-effect predictions
+- Frontend refinement: timeline sliders to view predicted supply chain states 30/60/90 days out
 
 ## Author
 Afifa Rizvi — MSc IT, Mohanlal Sukhadia University
