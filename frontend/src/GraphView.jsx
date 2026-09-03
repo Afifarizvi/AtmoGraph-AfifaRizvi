@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -7,7 +7,6 @@ import ReactFlow, {
   useEdgesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { initialNodes, initialEdges } from './data/mockGraphData';
 
 const riskStyles = {
   low: { background: '#d4edda', border: '2px solid #28a745' },
@@ -27,17 +26,62 @@ function applyRiskStyling(nodes) {
   }));
 }
 
+// Simple auto-layout: arrange nodes in columns by type, since the API
+// doesn't provide x/y positions (those were hardcoded in the old mock data).
+function autoLayout(nodes) {
+  const typeOrder = { Supplier: 0, Manufacturer: 1, Port: 2, Retailer: 3 };
+  const columnCounts = {};
+
+  return nodes.map((node) => {
+    const col = typeOrder[node.data.type] ?? 0;
+    const row = columnCounts[col] || 0;
+    columnCounts[col] = row + 1;
+
+    return {
+      ...node,
+      position: { x: col * 280, y: row * 120 },
+      type: col === 0 ? 'input' : col === 3 ? 'output' : undefined,
+    };
+  });
+}
+
 function GraphView() {
-  const styledInitialNodes = useMemo(() => applyRiskStyling(initialNodes), []);
-  const [nodes, , onNodesChange] = useNodesState(styledInitialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/graph')
+      .then((res) => res.json())
+      .then((data) => {
+        const positioned = autoLayout(data.nodes);
+        const styled = applyRiskStyling(positioned);
+        setNodes(styled);
+        setEdges(data.edges);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError('Could not connect to backend API. Is it running?');
+        setLoading(false);
+      });
+  }, [setNodes, setEdges]);
 
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
   }, []);
 
   const closePanel = () => setSelectedNode(null);
+
+  if (loading) {
+    return <div className="placeholder-text">Loading graph from backend...</div>;
+  }
+
+  if (error) {
+    return <div className="placeholder-text">{error}</div>;
+  }
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex' }}>
@@ -90,6 +134,10 @@ function GraphView() {
             <span className={`risk-badge risk-${selectedNode.data.risk_level}`}>
               {selectedNode.data.risk_level?.toUpperCase()}
             </span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">GNN Predicted Risk:</span>
+            <span>{selectedNode.data.predicted_risk_score?.toFixed(4)}</span>
           </div>
         </div>
       )}
