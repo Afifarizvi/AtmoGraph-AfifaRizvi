@@ -69,6 +69,45 @@ function GraphView() {
       });
   }, [setNodes, setEdges]);
 
+    useEffect(() => {
+    const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+
+    ws.onopen = () => console.log('✅ WebSocket connected');
+
+    ws.onmessage = (event) => {
+      console.log('📩 WebSocket message received:', event.data);
+      const message = JSON.parse(event.data);
+      if (message.type === 'risk_update') {
+        setNodes((currentNodes) => {
+          const updatedNodes = currentNodes.map((node) => {
+            const update = message.updated_nodes.find((u) => u.name === node.id);
+            if (update) {
+              console.log(`🔄 Updating node ${node.id} to risk ${update.risk_level}`);
+              return {
+                ...node,
+                data: { ...node.data, risk_level: update.risk_level },
+                style: {
+                  ...riskStyles[update.risk_level],
+                  borderRadius: 6,
+                  padding: 4,
+                  fontWeight: update.risk_level === 'high' ? 600 : 400,
+                },
+              };
+            }
+            return node;
+          });
+          return updatedNodes;
+        });
+      }
+    };
+
+    ws.onerror = (err) => console.error('❌ WebSocket error:', err);
+    ws.onclose = () => console.log('🔌 WebSocket disconnected');
+
+    return () => ws.close();
+  }, [setNodes]);
+
+    
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
   }, []);

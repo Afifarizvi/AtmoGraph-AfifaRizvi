@@ -2,8 +2,11 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "graph_db"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "nlp_engine"))
+from disruption_pipeline import process_disruption_text
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 from neo4j_client import Neo4jClient
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +19,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+
+
+manager = ConnectionManager()
+
+
+class DisruptionRequest(BaseModel):
+    text: str
 
 
 @app.get("/")
@@ -110,3 +135,31 @@ def get_node_details(node_name: str):
         raise HTTPException(status_code=404, detail=f"Node '{node_name}' not found")
 
     return result[0]
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()  # keep connection alive
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
+@app.post("/process-disruption")
+async def process_disruption(request: DisruptionRequest):
+    """
+    Run the NLP pipeline on the given text, update Neo4j risk levels,
+    and broadcast the update to all connected WebSocket clients.
+    """
+    client = Neo4jClient()
+    result = process_disruption_text(request.text, client)
+    client.close()
+
+    if result["updated_nodes"]:
+        await manager.broadcast({
+            "type": "risk_update",
+            "updated_nodes": result["updated_nodes"],
+        })
+
+    return result
