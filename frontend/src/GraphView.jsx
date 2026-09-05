@@ -1,3 +1,4 @@
+import { computeHopDistances, getProjectedRiskLevel } from './utils/ripplePropagation';
 import { useState, useCallback, useEffect } from 'react';
 import ReactFlow, {
   Background,
@@ -51,6 +52,9 @@ function GraphView() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dayHorizon, setDayHorizon] = useState('now');
+  const [rawNodes, setRawNodes] = useState([]);
+  const [rawEdges, setRawEdges] = useState([]);
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/graph')
@@ -60,6 +64,8 @@ function GraphView() {
         const styled = applyRiskStyling(positioned);
         setNodes(styled);
         setEdges(data.edges);
+        setRawNodes(data.nodes);
+        setRawEdges(data.edges);
         setLoading(false);
       })
       .catch((err) => {
@@ -94,6 +100,15 @@ function GraphView() {
                 },
               };
             }
+            setRawNodes((currentRawNodes) =>
+              currentRawNodes.map((node) => {
+                const update = message.updated_nodes.find((u) => u.name === node.id);
+                if (update) {
+                  return { ...node, data: { ...node.data, risk_level: update.risk_level } };
+                }
+                return node;
+              })
+            );
             return node;
           });
           return updatedNodes;
@@ -111,6 +126,33 @@ function GraphView() {
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
   }, []);
+
+    useEffect(() => {
+    if (rawNodes.length === 0) return;
+
+    const distances = computeHopDistances(rawNodes, rawEdges);
+    const positioned = autoLayout(rawNodes);
+
+    const restyled = positioned.map((node) => {
+      const projectedRisk = getProjectedRiskLevel(
+        node.data.risk_level,
+        distances[node.id],
+        dayHorizon
+      );
+      return {
+        ...node,
+        data: { ...node.data, projected_risk: projectedRisk },
+        style: {
+          ...riskStyles[projectedRisk],
+          borderRadius: 6,
+          padding: 4,
+          fontWeight: projectedRisk === 'high' ? 600 : 400,
+        },
+      };
+    });
+
+    setNodes(restyled);
+  }, [dayHorizon, rawNodes, rawEdges, setNodes]);
 
   const closePanel = () => setSelectedNode(null);
 
@@ -144,6 +186,23 @@ function GraphView() {
             }}
           />
         </ReactFlow>
+      </div>
+        <div className="timeline-slider">
+        <label>Time Horizon: <strong>{dayHorizon === 'now' ? 'Now' : `${dayHorizon} Days`}</strong></label>
+        <input
+          type="range"
+          min="0"
+          max="3"
+          step="1"
+          value={['now', 30, 60, 90].indexOf(dayHorizon)}
+          onChange={(e) => setDayHorizon(['now', 30, 60, 90][e.target.value])}
+        />
+        <div className="timeline-marks">
+          <span>Now</span>
+          <span>30d</span>
+          <span>60d</span>
+          <span>90d</span>
+        </div>
       </div>
 
       <div className="legend">
