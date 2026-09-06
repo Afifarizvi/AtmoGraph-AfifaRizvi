@@ -82,11 +82,39 @@ AtmoGraph-AfifaRizvi/
 
 **Milestone achieved:** End-to-end ripple-effect prediction pipeline — a disruption anywhere in the graph can now influence GNN-predicted risk scores for connected/similar nodes, not just the directly affected one.
 
-### 🔜 Week 4 — In Progress
+### ✅ Week 4 — Complete (Days 1–6)
 
-- Real-time integration: connect the ML pipeline to a WebSocket/FastAPI stream for live ripple-effect predictions
-- Frontend refinement: timeline sliders to view predicted supply chain states 30/60/90 days out
+**Backend (Real-Time Integration):**
+- FastAPI server built, connected to Neo4j with a health-check endpoint
+- REST endpoints added: `/graph` (full graph with live risk + GNN predictions) and `/node/{name}` (single node details)
+- WebSocket endpoint (`/ws`) added for real-time broadcast of risk updates
+- `/process-disruption` endpoint built — runs the full NLP pipeline (from Week 2) on incoming text and broadcasts any risk changes to all connected clients instantly
 
+**Frontend (Refine & Polish):**
+- Mock data fully replaced with live data fetched from the FastAPI backend
+- WebSocket client integrated — the dashboard updates in real time when a disruption is processed, with no page refresh needed
+- Timeline slider (Now / 30 / 60 / 90 days) added, simulating ripple propagation using BFS hop-distance from high-risk nodes across the graph — visually showing how a disruption's impact spreads over time
+- UI polish: fixed control panel layout and graph panning behavior
+
+**Milestone achieved:** Full real-time system — a disruption submitted as text is processed by NLP, updates Neo4j, and is reflected live on an interactive dashboard that can also project how far the impact might spread over the coming months.
+
+---
+
+## 🎯 Project Complete — Full System Overview
+
+AtmoGraph is now an end-to-end pipeline:
+
+**Neo4j** (32-node global supply chain graph) → **NLP** (spaCy entity extraction + disruption detection) → **GNN** (PyTorch Geometric risk prediction) → **FastAPI** (REST + WebSocket backend) → **React + React Flow** (interactive, real-time dashboard)
+
+A disruption mentioned in a news article can be submitted to the system and, within seconds:
+1. Be parsed for affected companies/locations
+2. Be matched to the correct node(s) in the supply chain graph
+3. Trigger a risk-level update in Neo4j
+4. Be reflected instantly on the live dashboard — including a projected view of how the disruption might ripple outward over the next 30/60/90 days
+
+**Tech stack:** Python, Neo4j (AuraDB), spaCy, PyTorch Geometric, FastAPI, WebSockets, React, React Flow
+
+**Timeline:** 4 weeks, 24 daily commits, from initial repo setup to a fully functional real-time predictive dashboard.
 ## Author
 Afifa Rizvi — MSc IT, Mohanlal Sukhadia University
 Internship Project @ Infotact Solutions
