@@ -100,15 +100,13 @@
 }
 
 .legend {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
   background: white;
   border: 1px solid #ddd;
   border-radius: 6px;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  z-index: 10;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  width: 160px;
+  box-sizing: border-box;
 }
 
 .legend-item {
@@ -129,24 +127,31 @@
 .legend-dot.medium { background-color: #ffc107; }
 .legend-dot.high { background-color: #dc3545; }
 
-.timeline-slider {
+.controls-panel {
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline-slider {
   background: white;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  z-index: 10;
-  width: 280px;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  width: 160px;
   text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  font-size: 0.8rem;
 }
 
 .timeline-slider label {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .timeline-slider input[type="range"] {
@@ -156,7 +161,7 @@
 .timeline-marks {
   display: flex;
   justify-content: space-between;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: #888;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
 }

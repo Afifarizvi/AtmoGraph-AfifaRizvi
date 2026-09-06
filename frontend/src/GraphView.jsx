@@ -75,44 +75,23 @@ function GraphView() {
       });
   }, [setNodes, setEdges]);
 
-    useEffect(() => {
+      useEffect(() => {
     const ws = new WebSocket('ws://127.0.0.1:8000/ws');
 
     ws.onopen = () => console.log('✅ WebSocket connected');
 
     ws.onmessage = (event) => {
-      console.log('📩 WebSocket message received:', event.data);
       const message = JSON.parse(event.data);
       if (message.type === 'risk_update') {
-        setNodes((currentNodes) => {
-          const updatedNodes = currentNodes.map((node) => {
+        setRawNodes((currentRawNodes) =>
+          currentRawNodes.map((node) => {
             const update = message.updated_nodes.find((u) => u.name === node.id);
             if (update) {
-              console.log(`🔄 Updating node ${node.id} to risk ${update.risk_level}`);
-              return {
-                ...node,
-                data: { ...node.data, risk_level: update.risk_level },
-                style: {
-                  ...riskStyles[update.risk_level],
-                  borderRadius: 6,
-                  padding: 4,
-                  fontWeight: update.risk_level === 'high' ? 600 : 400,
-                },
-              };
+              return { ...node, data: { ...node.data, risk_level: update.risk_level } };
             }
-            setRawNodes((currentRawNodes) =>
-              currentRawNodes.map((node) => {
-                const update = message.updated_nodes.find((u) => u.name === node.id);
-                if (update) {
-                  return { ...node, data: { ...node.data, risk_level: update.risk_level } };
-                }
-                return node;
-              })
-            );
             return node;
-          });
-          return updatedNodes;
-        });
+          })
+        );
       }
     };
 
@@ -120,8 +99,7 @@ function GraphView() {
     ws.onclose = () => console.log('🔌 WebSocket disconnected');
 
     return () => ws.close();
-  }, [setNodes]);
-
+  }, [setRawNodes]);
     
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
@@ -174,7 +152,12 @@ function GraphView() {
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
           fitView
+          panOnDrag={true}
+          panOnScroll={false}
+          zoomOnScroll={true}
+          zoomOnPinch={true}
         >
+        
           <Background />
           <Controls />
           <MiniMap
@@ -187,28 +170,31 @@ function GraphView() {
           />
         </ReactFlow>
       </div>
+              <div className="controls-panel">
         <div className="timeline-slider">
-        <label>Time Horizon: <strong>{dayHorizon === 'now' ? 'Now' : `${dayHorizon} Days`}</strong></label>
-        <input
-          type="range"
-          min="0"
-          max="3"
-          step="1"
-          value={['now', 30, 60, 90].indexOf(dayHorizon)}
-          onChange={(e) => setDayHorizon(['now', 30, 60, 90][e.target.value])}
-        />
-        <div className="timeline-marks">
-          <span>Now</span>
-          <span>30d</span>
-          <span>60d</span>
-          <span>90d</span>
+          <label>Time Horizon: <strong>{dayHorizon === 'now' ? 'Now' : `${dayHorizon} Days`}</strong></label>
+          <input
+            type="range"
+            min="0"
+            max="3"
+            step="1"
+            value={['now', 30, 60, 90].indexOf(dayHorizon)}
+            onChange={(e) => setDayHorizon(['now', 30, 60, 90][e.target.value])}
+          />
+          <div className="timeline-marks">
+            <span>Now</span>
+            <span>30d</span>
+            <span>60d</span>
+            <span>90d</span>
+          </div>
         </div>
-      </div>
 
-      <div className="legend">
-        <div className="legend-item"><span className="legend-dot low"></span> Low Risk</div>
-        <div className="legend-item"><span className="legend-dot medium"></span> Medium Risk</div>
-        <div className="legend-item"><span className="legend-dot high"></span> High Risk</div>
+        <div className="legend">
+          <div className="legend-item"><span className="legend-dot low"></span> Low Risk</div>
+          <div className="legend-item"><span className="legend-dot medium"></span> Medium Risk</div>
+          <div className="legend-item"><span className="legend-dot high"></span> High Risk</div>
+        </div>
+    
       </div>
 
       {selectedNode && (
